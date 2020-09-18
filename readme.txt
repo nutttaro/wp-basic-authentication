@@ -1,7 +1,7 @@
 === WP Basic Authentication ===
 Contributors: nutttaro
 Donate link: https://www.paypal.com/paypalme/nutttaro
-Tags: basic-authentication, authentication, htpasswd, password-protected, protected, password
+Tags: basic-authentication, authentication, htpasswd, password-protected, protected, password, k8s, kubernetes, docker
 Requires at least: 4.7
 Tested up to: 5.5
 Requires PHP: 7.0
@@ -12,13 +12,14 @@ Basic Authentication for protected your development WordPress site like .htpassw
 
 == Description ==
 
-WP Basic Authentication is a plugin for protected your development WordPress site like .htpasswd
+WP Basic Authentication is a plugin for protected your development WordPress site like .htpasswd and support Docker and Kubernetes (K8s)
 
 Features:
 
 * Easy for setting Basic Authentication
 * Basic Authentication works like .htpasswd
 * Protected development website or demo website without .htpasswd
+* Support Docker and Kubernetes (K8s)
 * The plugin is lightweight.
 
 == Installation ==
