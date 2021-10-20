@@ -1,10 +1,12 @@
 <?php
 /**
  * Plugin Name: WP Basic Authentication
+ * Plugin URI:        https://wordpress.org/plugins/wp-basic-authentication/
  * Description: Basic Authentication for protected your development WordPress site like .htpasswd
- * Version:           1.0.0
+ * Version:           1.0.1
  * Requires at least: 4.7
  * Requires PHP:      7.0
+ * Tested up to:      5.8.1
  * Author:            NuttTaro
  * Author URI:        https://nutttaro.com
  * License:           GPL v2 or later
