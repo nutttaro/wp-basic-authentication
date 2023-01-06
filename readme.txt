@@ -3,7 +3,7 @@ Contributors: nutttaro
 Donate link: https://www.paypal.com/paypalme/nutttaro
 Tags: basic-authentication, authentication, htpasswd, password-protected, protected, password, k8s, kubernetes, docker
 Requires at least: 4.7
-Tested up to: 5.8.1
+Tested up to: 6.1.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -43,6 +43,10 @@ Rename or delete 'wp-basic-authentication' directory in plugins directory via FT
 1. Screenshot of the menu page for Featured Posts Setting page.
 
 == Changelog ==
+
+= 1.0.2 =
+* Tested up to WordPress 6.1.1
+* Add Tip me on ko-fi
 
 = 1.0.1 =
 * Tested up to WordPress 5.8.1

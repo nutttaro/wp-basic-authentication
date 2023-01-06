@@ -54,6 +54,8 @@ class WPBA_Setting
                 ?>
             </form>
         </div>
+		<hr>
+		<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Tip Me on Ko-fi', '#29abe0', 'J3J6HM43W');kofiwidget2.draw();</script>
         <?php
     }
 
