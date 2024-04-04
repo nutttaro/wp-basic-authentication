@@ -3,10 +3,10 @@
  * Plugin Name: WP Basic Authentication
  * Plugin URI:        https://wordpress.org/plugins/wp-basic-authentication/
  * Description: Basic Authentication for protected your development WordPress site like .htpasswd
- * Version:           1.0.2
+ * Version:           1.0.3
  * Requires at least: 4.7
- * Requires PHP:      7.0
- * Tested up to:      6.1.1
+ * Requires PHP:      7.4
+ * Tested up to:      6.5
  * Author:            NuttTaro
  * Author URI:        https://nutttaro.com
  * License:           GPL v2 or later
@@ -19,7 +19,7 @@
 define('WPBA_PATH', plugin_dir_path(__FILE__));
 define('WPBA_BASENAME', plugin_basename(__FILE__));
 define('WPBA_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WPBA_VERSION', '1.0.2');
+define('WPBA_VERSION', '1.0.3');
 
 /**
  * Class WPBA_Basic_Authentication
@@ -46,11 +46,14 @@ class WPBA_Basic_Authentication
             new WPBA_Setting();
         } else {
 
+			$enable_frontend = $this->options['enable'] ?? 0;
             $enable_login = $this->options['enable_login'] ?? 0;
 
             if ($enable_login && $this->is_login_page()) {
                 add_action('init', [$this, 'basic_auth_handler'], 1);
-            } elseif (!$this->is_login_page()) {
+            }
+
+			if ($enable_frontend && !$this->is_login_page()) {
                 add_action('init', [$this, 'basic_auth_handler'], 1);
             }
 
@@ -62,12 +65,10 @@ class WPBA_Basic_Authentication
      */
     public function basic_auth_handler()
     {
-
-        $enable = $this->options['enable'] ?? 0;
         $username = $this->options['username'] ?? '';
         $password = $this->options['password'] ?? '';
 
-        if ($enable && $username) {
+        if ($username) {
 
             $AUTH_USER = $username;
             $AUTH_PASS = $password;

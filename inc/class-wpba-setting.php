@@ -55,8 +55,8 @@ class WPBA_Setting
             </form>
         </div>
 		<hr>
-		<script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Tip Me on Ko-fi', '#29abe0', 'J3J6HM43W');kofiwidget2.draw();</script>
-        <?php
+		<a href='https://ko-fi.com/J3J6HM43W' target='_blank'><img height='36' style='border:0px;height:36px;' src='<?php echo WPBA_PLUGIN_URL; ?>assets/images/kofi1.webp' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+		<?php
     }
 
     /**
