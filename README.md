@@ -1,11 +1,11 @@
 # WP Basic Authentication
 
 * Contributors: nutttaro
-* Donate link: https://www.paypal.com/paypalme/nutttaro
+* Donate link: https://coff.ee/nutttaro
 * Tags: taxonomy, order
-* Requires at least: 4.7
+* Requires at least: 5.7
 * Tested up to: 6.5
-* Requires PHP: 7.4
+* Requires PHP: 6.8.1
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,7 +38,18 @@ Go to *Authentication* in the left-hand menu to start setting the plugin
 
 Rename or delete 'wp-basic-authentication' directory in plugins directory via FTP or commend line
 
+**Password Migration (v1.1.0+)**
+
+If you're updating from a version older than 1.1.0, your existing password will be automatically migrated to the new secure hashed format. You don't need to change your password - the plugin will handle this automatically and show you a success message in the WordPress admin.
+
+This migration ensures your password is stored securely using WordPress's built-in `wp_hash_password()` function.
+
 ## Changelog
+
+###### 1.1.0
+* Hash password with automatic migration from older versions
+* Automatic password migration for users updating from pre-1.1.0 versions
+* Tested up to WordPress 6.8.1
 
 ###### 1.0.3
 * Tested up to WordPress 6.5

@@ -1,9 +1,10 @@
 === WP Basic Authentication ===
 Contributors: nutttaro
-Donate link: https://www.paypal.com/paypalme/nutttaro
-Tags: basic-authentication, authentication, htpasswd, password-protected, protected, password, k8s, kubernetes, docker
-Requires at least: 4.7
-Tested up to: 6.5
+Donate link: https://coff.ee/nutttaro
+Tags: authentication, basic-auth, protected
+Requires at least: 5.7
+Tested up to: 6.9
+Stable tag: 1.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -37,12 +38,21 @@ Go to *Authentication* in the left-hand menu to start setting the plugin
 
 Rename or delete 'wp-basic-authentication' directory in plugins directory via FTP or commend line
 
+= Password Migration (v1.1.0+) =
+
+If you're updating from a version older than 1.1.0, your existing password will be automatically migrated to the new secure hashed format. You don't need to change your password - the plugin will handle this automatically and show you a success message in the WordPress admin.
+
 == Screenshots ==
 
 1. Basic Authentication dialog
 1. Screenshot of the menu page for Featured Posts Setting page.
 
 == Changelog ==
+
+= 1.1.0 =
+* Hash password with automatic migration from older versions
+* Automatic password migration for users updating from pre-1.1.0 versions
+* Tested up to WordPress 6.9
 
 = 1.0.3 =
 * Tested up to WordPress 6.5
