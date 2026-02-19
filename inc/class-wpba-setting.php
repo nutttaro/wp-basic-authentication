@@ -235,8 +235,8 @@ class WPBA_Setting
 		printf(
 			'<p class="description" id="enable_login-description">' .
 				/* translators: %s: URL to the plugin FAQ page */
-				esc_html__(
-					'<strong>Warning</strong>: If enable basic authentication for login page and forgot password, please see <a href="%s" target="_blank">FAQs in plugin page</a>',
+				_e(
+					'<strong>Warning: If enable basic authentication for login page and forgot password, please see <a href="%s" target="_blank">FAQs in plugin page</a>',
 					'wp-basic-authentication'
 				) .
 				'</p>',

@@ -4,7 +4,7 @@ Donate link: https://coff.ee/nutttaro
 Tags: authentication, basic-auth, protected
 Requires at least: 5.7
 Tested up to: 6.9
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -48,6 +48,10 @@ If you're updating from a version older than 1.1.0, your existing password will 
 1. Screenshot of the menu page for Featured Posts Setting page.
 
 == Changelog ==
+
+= 1.1.1 =
+* Fix small issue on setting page
+
 
 = 1.1.0 =
 * Hash password with automatic migration from older versions
