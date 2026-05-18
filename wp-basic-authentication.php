@@ -3,7 +3,7 @@
  * Plugin Name:       WP Basic Authentication
  * Plugin URI:        https://wordpress.org/plugins/wp-basic-authentication/
  * Description:       Basic Authentication for protected your development WordPress site like .htpasswd
- * Version:           1.1.1
+ * Version:           1.2.0
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Tested up to:      6.9
@@ -25,7 +25,9 @@ if (!defined('ABSPATH')) {
 define('WPBA_PATH', plugin_dir_path(__FILE__));
 define('WPBA_BASENAME', plugin_basename(__FILE__));
 define('WPBA_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WPBA_VERSION', '1.1.1');
+define('WPBA_VERSION', '1.2.0');
+
+require_once WPBA_PATH . 'inc/helpers.php';
 
 /**
  * Class WPBA_Basic_Authentication
@@ -65,15 +67,21 @@ class WPBA_Basic_Authentication
 		if (is_admin()) {
 			require_once WPBA_PATH . 'inc/class-wpba-setting.php';
 			new \WPBA_Setting();
+			add_action('admin_notices', [$this, 'environment_type_notice']);
 		} else {
 			$enable_frontend = $this->options['enable'] ?? 0;
 			$enable_login = $this->options['enable_login'] ?? 0;
+			$enable_rest = $this->options['enable_rest'] ?? 0;
 
 			if ($enable_login && $this->is_login_page()) {
 				add_action('init', [$this, 'basic_auth_handler'], 1);
 			}
 
-			if ($enable_frontend && !$this->is_login_page()) {
+			if ($enable_rest && $this->is_rest_request()) {
+				add_action('init', [$this, 'basic_auth_handler'], 1);
+			}
+
+			if ($enable_frontend && !$this->is_login_page() && !$this->is_rest_request()) {
 				add_action('init', [$this, 'basic_auth_handler'], 1);
 			}
 		}
@@ -92,6 +100,14 @@ class WPBA_Basic_Authentication
 	 */
 	public function basic_auth_handler(): void
 	{
+		if ($this->is_ip_allowed()) {
+			return;
+		}
+
+		if ($this->is_path_excluded()) {
+			return;
+		}
+
 		$username = $this->options['username'] ?? '';
 		$password = $this->options['password'] ?? '';
 
@@ -114,26 +130,16 @@ class WPBA_Basic_Authentication
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Password must not be sanitized as it would alter the value. Only unslashed for security.
 		$provided_password = isset($_SERVER['PHP_AUTH_PW']) ? wp_unslash($_SERVER['PHP_AUTH_PW']) : '';
 
-		// Check if stored password is hashed
-		// WordPress password hashes start with $P$ and are typically 34 characters
-		// But we should also check for other hash formats that might be longer
-		$is_password_hashed = (
-			(strlen($password) >= 34 && strpos($password, '$wp') === 0) ||
-			(strlen($password) >= 34 && strpos($password, '$P$') === 0) ||
-			(strlen($password) >= 34 && strpos($password, '$2y$') === 0) ||
-			(strlen($password) >= 34 && strpos($password, '$argon2') === 0)
-		);
+		$is_password_hashed = wpba_is_password_hash($password);
 
 		$is_authenticated = false;
 
 		// First check username
-		if (hash_equals($provided_username, $username)) {
+		if (hash_equals($username, $provided_username)) {
 			if ($is_password_hashed) {
-				// Compare with hashed password
 				$is_authenticated = wp_check_password($provided_password, $password);
 			} else {
-				// Legacy support for unhashed passwords (for migration period)
-				$is_authenticated = hash_equals($provided_password, $password);
+				$is_authenticated = hash_equals($password, $provided_password);
 			}
 		}
 
@@ -183,6 +189,9 @@ class WPBA_Basic_Authentication
 			'username' => '',
 			'password' => '',
 			'enable_login' => 0,
+			'enable_rest' => 0,
+			'excluded_paths' => '',
+			'allowed_ips' => '',
 		];
 
 		update_option('wpba_auth_settings', $this->options);
@@ -215,17 +224,7 @@ class WPBA_Basic_Authentication
 		if (version_compare($stored_version, '1.1.0', '<') && !empty($this->options['password'])) {
 			$password = $this->options['password'];
 
-			// Better detection of hashed passwords
-			// WordPress password hashes start with $P$ and are typically 34 characters
-			// But we should also check for other hash formats that might be longer
-			$is_already_hashed = (
-				(strlen($password) >= 34 && strpos($password, '$wp') === 0) ||
-				(strlen($password) >= 34 && strpos($password, '$P$') === 0) ||
-				(strlen($password) >= 34 && strpos($password, '$2y$') === 0) ||
-				(strlen($password) >= 34 && strpos($password, '$argon2') === 0)
-			);
-
-			if (!$is_already_hashed) {
+			if (!wpba_is_password_hash($password)) {
 				// Hash the existing password
 				$this->options['password'] = wp_hash_password($password);
 
@@ -243,6 +242,92 @@ class WPBA_Basic_Authentication
 
 		// Update version to current
 		update_option('wpba_auth_version', WPBA_VERSION);
+	}
+
+	/**
+	 * Check if the current request is a REST API request.
+	 *
+	 * @return bool
+	 */
+	private function is_rest_request(): bool
+	{
+		$request_uri = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+		$rest_prefix = function_exists('rest_get_url_prefix') ? rest_get_url_prefix() : 'wp-json';
+		return strpos($request_uri, '/' . $rest_prefix . '/') !== false
+			|| substr($request_uri, -strlen('/' . $rest_prefix)) === '/' . $rest_prefix;
+	}
+
+	/**
+	 * Check if the remote IP is in the allowed list.
+	 *
+	 * @return bool
+	 */
+	private function is_ip_allowed(): bool
+	{
+		$allowed_ips = $this->options['allowed_ips'] ?? '';
+		if (empty($allowed_ips)) {
+			return false;
+		}
+
+		$remote_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+		$ips = array_filter(array_map('trim', explode("\n", $allowed_ips)));
+
+		return in_array($remote_ip, $ips, true);
+	}
+
+	/**
+	 * Check if the current request path is in the excluded list.
+	 * Supports exact match and prefix wildcard (e.g. /api/*).
+	 *
+	 * @return bool
+	 */
+	private function is_path_excluded(): bool
+	{
+		$excluded_paths = $this->options['excluded_paths'] ?? '';
+		if (empty($excluded_paths)) {
+			return false;
+		}
+
+		$request_uri = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+		$request_path = wp_parse_url($request_uri, PHP_URL_PATH);
+
+		$paths = array_filter(array_map('trim', explode("\n", $excluded_paths)));
+
+		foreach ($paths as $path) {
+			if (substr($path, -1) === '*') {
+				$prefix = substr($path, 0, -1);
+				if (strpos($request_path, $prefix) === 0) {
+					return true;
+				}
+			} elseif (rtrim($request_path, '/') === rtrim($path, '/')) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Show admin notice when plugin is active on a production environment.
+	 *
+	 * @return void
+	 */
+	public function environment_type_notice(): void
+	{
+		if (!function_exists('wp_get_environment_type')) {
+			return;
+		}
+
+		$env_type = wp_get_environment_type();
+		$enable_frontend = $this->options['enable'] ?? 0;
+		$enable_login = $this->options['enable_login'] ?? 0;
+		$enable_rest = $this->options['enable_rest'] ?? 0;
+
+		if ($env_type === 'production' && ($enable_frontend || $enable_login || $enable_rest)) {
+			echo '<div class="notice notice-warning is-dismissible">';
+			echo '<p>' . esc_html__('WP Basic Authentication is active on a production environment. This plugin is typically intended for development or staging sites.', 'wp-basic-authentication') . '</p>';
+			echo '</div>';
+		}
 	}
 
 	/**

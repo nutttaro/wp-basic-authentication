@@ -4,8 +4,8 @@
 * Donate link: https://coff.ee/nutttaro
 * Tags: taxonomy, order
 * Requires at least: 5.7
-* Tested up to: 6.5
-* Requires PHP: 6.8.1
+* Tested up to: 6.9
+* Requires PHP: 7.4
 * License: GPLv2 or later
 * License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,23 @@ If you're updating from a version older than 1.1.0, your existing password will 
 This migration ensures your password is stored securely using WordPress's built-in `wp_hash_password()` function.
 
 ## Changelog
+
+###### 1.2.0
+* Add REST API (/wp-json/) authentication toggle
+* Add path exclusion list for health checks, webhooks, and other endpoints
+* Add IP allowlist to bypass authentication for trusted addresses
+* Add production environment warning when plugin is active
+* Add uninstall cleanup — plugin options are now removed on deletion
+* Fix output escaping for translatable strings with HTML
+* Refactor shared password hash detection into a single helper function
+
+###### 1.1.2
+* Fix password authentication failure caused by double-hashing during save
+* Fix hash detection to support all WordPress password hash formats
+* Fix warning message HTML on settings page
+
+###### 1.1.1
+* Fix small issue on setting page
 
 ###### 1.1.0
 * Hash password with automatic migration from older versions
